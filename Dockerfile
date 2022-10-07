@@ -9,6 +9,8 @@ ARG WORKSPACE="/workspace"
 #libgl1 - for rendering 2D & 3D graphics in ubuntu(Open GL)
 # libgomp1 - for multi-processing (GNU/GCC Open MP)
 # are required dependencies for open3d
+# link for reason of installing follwong libraries: 
+# http://www.open3d.org/docs/latest/docker.html(on master 6d28a5b)
 RUN apt update && apt install  --no-install-recommends -y \
     build-essential \
     curl \
