@@ -52,7 +52,3 @@ build: ## Builds the container image
 		--progress=plain \
 		--tag $(CONTAINER) \
 		.
-
-
-
-
