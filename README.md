@@ -22,7 +22,7 @@ In the Second terminal, to attach a terminal to the container
 ```
 ~$ make shell
 ```
-After the docker container is launched, run the basic test file from Open3D tutorials here to check if the 
+After the docker container is launched, run the basic test file from Open3D tutorials [here](http://www.open3d.org/docs/release/tutorial/visualization/visualization.html#Function-draw_geometries) to check if the 
 installation and build is fine.
 ```
 ~$ cd src/
