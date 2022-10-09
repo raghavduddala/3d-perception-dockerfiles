@@ -22,3 +22,12 @@ In the Second terminal, to attach a terminal to the container
 ```
 ~$ make shell
 ```
+After the docker container is launched, run the basic test file from Open3D tutorials here to check if the 
+installation and build is fine.
+```
+~$ cd src/
+~$ python3 test_open3d.py 
+```
+A sample .ply file containing a Point cloud from Open 3D is downloaded and visualized in the following way.
+
+![Open-3D-Visualization](https://user-images.githubusercontent.com/12818429/194731824-540163ae-6506-442f-ac54-c0887e8891b6.png)
