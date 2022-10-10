@@ -12,4 +12,3 @@ o3d.visualization.draw_geometries(
     lookat=[2.6172, 2.0475, 1.532],
     up=[-0.0694, -0.9768, 0.2024],
 )
-
