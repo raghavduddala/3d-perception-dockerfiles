@@ -2,8 +2,24 @@
 
 
 This repository contains Dockerfile for the Open3D and will be updated regularly with updated versions 
-to include vaious other libraries required to carry out 3D-perception.
+to include various other libraries required to carry out 3D-perception. 
 
+For now, the single Dockerfile is tested for the following settings for an x86_64:
+
+|System         | Version       | 
+| ------------- |:-------------:| 
+| Ubuntu        | 20.04         | 
+| Docker        | 20.10.14      | 
+
+with : 
+
+|System         | Version       | 
+| ------------- |:-------------:| 
+| pip           | 20.3          | 
+| Python        | 3.8           |
+| Open3D        | 0.15.2        | 
+
+> The PyPI has open3d with version no. 0.15.2 instead of 0.15.1 . I believe it is just a new commit fully resolved with any issues from 0.15.1
 
 
 ### Steps to use the Docker files to create Docker Images:
