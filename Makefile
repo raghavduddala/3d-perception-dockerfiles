@@ -12,7 +12,7 @@ help: ## Display the help message
 		@grep -hE '^\S+:.*##' $(MAKEFILE_LIST) | sed -e 's/:[[:blank:]]*\(##\)[[:blank:]]*/\1/' | column -s '##' -t
 
 .PHONY: version
-help: ## Display the version
+version: ## Display the version
 		@echo $(VERSION)
 
 # X11 - UNIX SOCKET for network over the container
