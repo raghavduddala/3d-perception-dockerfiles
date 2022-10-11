@@ -1,6 +1,6 @@
 # 3d-obstacle-detection
 
-
+---
 This repository contains Dockerfile for the Open3D and will be updated regularly with updated versions 
 to include various other libraries required to carry out 3D-perception. 
 
@@ -21,7 +21,7 @@ with :
 
 > The PyPI has open3d with version no. 0.15.2 instead of 0.15.1 . I believe it is just a new commit fully resolved with any issues from 0.15.1
 
-
+---
 ### Steps to use the Docker files to create Docker Images:
 
 ```
@@ -47,3 +47,9 @@ installation and build is fine.
 A sample .ply file containing a Point cloud from Open 3D is downloaded and visualized in the following way.
 
 ![Open-3D-Visualization](https://user-images.githubusercontent.com/12818429/194731824-540163ae-6506-442f-ac54-c0887e8891b6.png)
+
+---
+### Usage examples when using with other repos that require the docker container
+My Repos using this include https://github.com/raghavduddala/point_clouds_open3d.git
+
+where the repo we want to run can be cloned under the `src` directory of this docker `workspace` folder.
