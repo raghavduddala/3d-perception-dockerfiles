@@ -1,8 +1,6 @@
 VERSION := 0.0.1
-IMAGE := raghav-3d
+IMAGE := raghav-open3d
 CONTAINER := ${IMAGE}:${VERSION}
-CONTAINER_NAME := raghav-ta-open3d
-DOCKER := docker
 XSOCK := /tmp/.X11-unix
 # No Image name as it has to be maintained with the github container registry
 # Later on we can add specific tags and version names depending on long-term maintenance
@@ -20,7 +18,7 @@ version: ## Display the version
 .PHONY: dev
 dev: ## runs the env for open3d in the container
 		@xhost +local:root 		
-		@$ docker run --rm -it \
+		@docker run --rm -it \
 			--privileged \
 			--device  /dev:/dev \
 			--env="DISPLAY" \
@@ -29,7 +27,7 @@ dev: ## runs the env for open3d in the container
 			--volume $(PWD):/workspace/ \
 			--volume $(XSOCK):$(XSOCK) \
 			--network host \
-			--name $(CONTAINER_NAME) \
+			--name $(IMAGE) \
 			$(CONTAINER) \
 			/bin/bash
 		@xhost -local:root
@@ -37,14 +35,14 @@ dev: ## runs the env for open3d in the container
 
 .PHONY: shell
 shell: ## attaches a shell to a currently running container
-		@$(DOCKER) exec -ti \
-		$(CONTAINER_NAME) \
+		@docker exec -ti \
+		$(IMAGE) \
 		/bin/bash
 
 
 .PHONY: build
 build: ## Builds the container image
-		@DOCKER_BUILDKIT=1 $(DOCKER) build \
+		@DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
 		--progress=plain \
 		--tag $(CONTAINER) \
