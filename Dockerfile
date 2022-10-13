@@ -12,12 +12,9 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     update-locale LANG=$LANG LC_ALL=$LC_ALL LANGUAGE=$LANGUAGE
 
 # Setting up LA/Pacific Time
-ENV TZ 'America/Los_Angeles'
-RUN echo $TZ > /etc/timezone && \
-    rm /etc/localtime && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata
+ENV TZ=Etc/UTC
 
+# Setting up workspace for workdir
 ENV WORKSPACE="/workspace/"
 
 #libgl1 - for rendering 2D & 3D graphics in ubuntu(Open GL)
