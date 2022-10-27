@@ -1,0 +1,93 @@
+# Need not worry about what nvidia-smi version is telling us about since the underlying reason is as the following 
+# https://github.com/NVIDIA/nvidia-docker/issues/1237
+
+# Choosing 11.6 cudatoolkit and tensorflow 2.7 as a design choice 
+# as the following versions of other frameworks have most of the issues resolved :
+
+# 1. 11.6 has a Pip Package for PyTorch
+# 2. 11.6 with Tensorflow 2.7 and Tensort 8.2.3 is available in 22.02-tf2-py3
+# 3. also has the required libraries pre-installed for onnx and
+
+# The tensorflow container comes with almost all the required libraries
+# the remaining pre-requisites for Open3D are installed after when 
+# building it from source
+
+FROM nvcr.io/nvidia/tensorflow:22.02-tf2-py3
+
+# Sets up non interactive mode when running apt install commands
+ENV DEBIAN_FRONTEND=noninteractive
+ENV WORKSPACE="/workspace/"
+
+ENV OPEN3D_VERSION=v0.15.1
+
+# Installing ONNX, tensorboard and CMAKE 
+# CMake >= 3.19 required for  \ 0.15.1
+
+
+RUN python3 -m pip install \
+    onnx \
+    onnxruntime \
+    tensorboard \
+    cmake==3.24.0 
+
+# Installing PyTorch
+RUN python3 -m pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu116
+
+
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+    && dpkg -i cuda-keyring_1.0-1_all.deb \
+    && apt update 
+
+RUN apt update && apt install --reinstall --no-install-recommends \
+    libcublas-dev-11-6=11.8.1.74-1 \
+    libcufft-dev-11-6=10.7.0.55-1 \
+    libcusolver-dev-11-6=11.3.2.55-1 \
+    libcusparse-dev-11-6=11.7.1.55-1 \
+    libnpp-dev-11-6=11.6.0.55-1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt clean
+
+
+# Installing Open3D ( This needs to be built from source mostly)
+RUN git clone -b ${OPEN3D_VERSION} https://github.com/isl-org/Open3D \
+    && cd Open3D \
+    && git submodule update --init --recursive \
+    && git clone -b master https://github.com/isl-org/Open3D-ML \
+    && chmod +x util/install_deps_ubuntu.sh \
+    && sed -i 's/SUDO=${SUDO:=sudo}/SUDO=${SUDO:=}/g' util/install_deps_ubuntu.sh \
+    && util/install_deps_ubuntu.sh assume-yes \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/open3d \
+        -DGLIBCXX_USE_CXX11_ABI=OFF \
+        -DBUILD_BENCHMARKS=ON \
+        -DBUILD_CACHED_CUDA_MANAGER=ON \
+        -DBUILD_CUDA_MODULE=ON \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_FILAMENT_FROM_SOURCE=OFF \
+        -DBUILD_GUI=ON \
+        -DBUILD_LIBREALSENSE=ON \
+        -DBUILD_PYTHON_MODULE=ON \
+        -DBUILD_PYTORCH_OPS=ON \
+        -DBUILD_SHARED_LIBS=ON \   
+        -DBUILD_TENSORFLOW_OPS=OFF \
+        -DBUILD_UNIT_TESTS=OFF \
+        -DBUNDLE_OPEN3D_ML=ON \
+        -DOPEN3D_ML_ROOT=../Open3D-ML \
+        -DPYTHON_EXECUTABLE=$(which python3) \
+        -DUSE_BLAS=ON \
+        -DUSE_SYSTEM_LIBREALSENSE=OFF \
+        -DWITH_OPENMP=ON \
+        -DWITH_IPPICV=ON \
+        ..
+
+RUN cd Open3D/build \
+    && make -j$(nproc)
+
+RUN python3 -m pip install -U yapf 
+
+RUN cd Open3D/build \
+    && make install-pip-package 
+
+WORKDIR ${WORKSPACE}
