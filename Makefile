@@ -1,12 +1,8 @@
-VERSION := 0.0.2
+VERSION := 0.0.1
 IMAGE := raghav-tf-pt-o3d
 CONTAINER := ${IMAGE}:${VERSION}
 DOCKERFILE := Dockerfile.pt3d
-# CONTAINER := nvcr.io/nvidia/tensorflow:22.02-tf2-py3
-# CONTAINER := nvcr.io/nvidia/cuda:11.6.0-cudnn8-devel-ubuntu20.04
 XSOCK := /tmp/.X11-unix
-# No Image name as it has to be maintained with the github container registry
-# Later on we can add specific tags and version names depending on long-term maintenance
 
 .PHONY: help
 help: ## Display the help message
@@ -20,20 +16,20 @@ version: ## Display the version
 # XAUTH - authorizing other users to run graphical applications 
 .PHONY: dev
 dev: ## runs the env for open3d in the container
-		@xhost +local:root 		
-		@docker run --rm -it \
-			--privileged \
-			--device  /dev:/dev \
-			--env="DISPLAY" \
-			--env="QT_X11_NO_MITSHM=1" \
-			--env="TERM=xterm-256color" \
-			--volume $(PWD):/workspace/ \
-			--volume $(XSOCK):$(XSOCK) \
-			--network host \
-			--name $(IMAGE) \
-			$(CONTAINER) \
-			/bin/bash
-		@xhost -local:root
+	@xhost +local:root 		
+	@docker run --rm -it \
+		--privileged \
+		--device  /dev:/dev \
+		--env="DISPLAY" \
+		--env="QT_X11_NO_MITSHM=1" \
+		--env="TERM=xterm-256color" \
+		--volume $(PWD):/workspace/ \
+		--volume $(XSOCK):$(XSOCK) \
+		--network host \
+		--name $(IMAGE) \
+		$(CONTAINER) \
+		/bin/bash
+	@xhost -local:root
 
 
 # CUDA Development
@@ -63,7 +59,6 @@ shell: ## attaches a shell to a currently running container
 		@docker exec -ti \
 		$(IMAGE) \
 		/bin/bash
-
 
 .PHONY: build
 build: ## Builds the container image

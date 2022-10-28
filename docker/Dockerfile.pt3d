@@ -1,18 +1,12 @@
 # Need not worry about what nvidia-smi version is telling us about since the underlying reason is as the following 
 # https://github.com/NVIDIA/nvidia-docker/issues/1237
 
-# Choosing 11.6 cudatoolkit and tensorflow 2.7 as a design choice 
-# as the following versions of other frameworks have most of the issues resolved :
-
+# Choosing 11.6 cudatoolkit 
 # 1. 11.6 has a Pip Package for PyTorch
-# 2. 11.6 with Tensorflow 2.7 and Tensort 8.2.3 is available in 22.02-tf2-py3
-# 3. also has the required libraries pre-installed for onnx and
+# 2. 11.6 with Tensorflow 2.7 is available for a later install
 
-# The tensorflow container comes with almost all the required libraries
-# the remaining pre-requisites for Open3D are installed after when 
-# building it from source
 
-FROM nvcr.io/nvidia/tensorflow:22.02-tf2-py3
+FROM  nvcr.io/nvidia/cuda:11.6.0-cudnn8-devel-ubuntu20.04
 
 # Sets up non interactive mode when running apt install commands
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,35 +14,43 @@ ENV WORKSPACE="/workspace/"
 
 ENV OPEN3D_VERSION=v0.15.1
 
+
+# Library dependencies both for Open3D and PyTorch
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    gfortran \
+    git \
+    libblas-dev \
+    libopenblas-dev \
+    libopenmpi-dev \
+    liblapack-dev \
+    liblapacke-dev \
+    libtbb2 \
+    make \
+    nano \
+    python3.8 \
+    python3-pip \
+    wget \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean 
+
 # Installing ONNX, tensorboard and CMAKE 
-# CMake >= 3.19 required for  \ 0.15.1
-
-
+# CMake >= 3.19 required for  \ 0.15.1, 
+# yapf and ninja are required for pybind to install pip-package
 RUN python3 -m pip install \
     onnx \
     onnxruntime \
+    ninja \
     tensorboard \
+    yapf \
     cmake==3.24.0 
 
 # Installing PyTorch
 RUN python3 -m pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu116
 
-
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
-    && dpkg -i cuda-keyring_1.0-1_all.deb \
-    && apt update 
-
-RUN apt update && apt install --reinstall --no-install-recommends \
-    libcublas-dev-11-6=11.8.1.74-1 \
-    libcufft-dev-11-6=10.7.0.55-1 \
-    libcusolver-dev-11-6=11.3.2.55-1 \
-    libcusparse-dev-11-6=11.7.1.55-1 \
-    libnpp-dev-11-6=11.6.0.55-1 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt clean
-
-
-# Installing Open3D ( This needs to be built from source mostly)
+# Installing Open3D - Built from source
 RUN git clone -b ${OPEN3D_VERSION} https://github.com/isl-org/Open3D \
     && cd Open3D \
     && git submodule update --init --recursive \
@@ -85,9 +87,13 @@ RUN git clone -b ${OPEN3D_VERSION} https://github.com/isl-org/Open3D \
 RUN cd Open3D/build \
     && make -j$(nproc)
 
-RUN python3 -m pip install -U yapf 
+# Open3d Wheels get built only with pip version >=20.3
+RUN python3 -m pip install -U pip>=20.3 
 
+# Installs C++ packages and links the shared libraries to executables 
+# and then installs the python pip-package
 RUN cd Open3D/build \
+    && make install && ldconfig \
     && make install-pip-package 
 
 WORKDIR ${WORKSPACE}
